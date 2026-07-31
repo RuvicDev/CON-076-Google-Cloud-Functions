@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ruvic-cloud-functions-connector"
+version = "1.0.0"
+description = "Conector Ruvic para Google Cloud Functions"
+requires-python = ">=3.10"
+dependencies = [
+  "google-cloud-functions>=1.16,<2.0",
+  "google-auth>=2.28,<3.0",
+  "requests>=2.31,<3.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["ruvic_cloud_functions_connector*"]

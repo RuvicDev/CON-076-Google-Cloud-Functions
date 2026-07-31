@@ -1,0 +1,62 @@
+{
+  "id": "cloud_functions",
+  "name": "Google Cloud Functions",
+  "name_en": "Google Cloud Functions",
+  "version": "1.0.0",
+  "description": "Invocación y gestión de Google Cloud Functions: invocar una función HTTP, listar funciones desplegadas y consultar el estado de despliegue",
+  "description_en": "Invocation and management of Google Cloud Functions: invoke an HTTP function, list deployed functions and check deployment status",
+  "icon": "icon.svg",
+  "category": "cloud",
+  "category_en": "cloud",
+  "keywords": ["google cloud", "gcp", "cloud functions", "serverless", "faas", "cloud", "nube"],
+  "library": {
+    "package": "ruvic-cloud-functions-connector",
+    "install": "pip install git+https://github.com/Dgirto/Google-Cloud-Functions.git#subdirectory=lib",
+    "import_name": "ruvic_cloud_functions_connector"
+  },
+  "auth_modes": [
+    {
+      "id": "service_account",
+      "label": "Cuenta de servicio (JSON)",
+      "fields": [
+        {
+          "key": "service_account_json",
+          "label": "JSON de la cuenta de servicio",
+          "type": "textarea",
+          "secret": true,
+          "required": true,
+          "help_text": "Contenido completo del archivo JSON descargado desde Google Cloud Console → IAM y administración → Cuentas de servicio."
+        },
+        {
+          "key": "region",
+          "label": "Región",
+          "type": "text",
+          "required": true,
+          "placeholder": "us-central1"
+        },
+        {
+          "key": "function_name",
+          "label": "Función",
+          "type": "text",
+          "required": true,
+          "placeholder": "mi-funcion",
+          "help_text": "Nombre de la función objetivo para invoke() y get_status(). list_functions() lista todas las funciones de la región."
+        },
+        {
+          "key": "connect_timeout",
+          "label": "Timeout de conexión (segundos)",
+          "type": "number",
+          "required": false,
+          "default": "10"
+        }
+      ]
+    }
+  ],
+  "env_prefix": "RUVIC_CLOUD_FUNCTIONS_",
+  "operations": ["cloud_functions.invoke", "cloud_functions.list_functions", "cloud_functions.get_status"],
+  "test_connection": true,
+  "docs": {
+    "skill": "SKILL.md",
+    "permissions_note": "La cuenta de servicio necesita el rol 'Cloud Functions Viewer' (para listar y consultar estado) y 'Cloud Functions Invoker' (para invocar), ambos limitados al proyecto o, idealmente, a la función específica. Este conector SÍ ejecuta código real al invocar la función."
+  }
+}

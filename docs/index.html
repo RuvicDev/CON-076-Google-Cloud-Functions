@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="doc_title">Conector Google Cloud Functions — Ruvic</title>
+  <link rel="stylesheet" href="assets/ruvic.css">
+</head>
+<body>
+  <main class="ruvic-container">
+    <nav class="ruvic-toc" aria-label="Índice">
+      <h2 data-i18n="toc_title">Contenido</h2>
+      <ol>
+        <li><a href="#que-es" data-i18n="toc.que_es">¿Qué es y para qué sirve?</a></li>
+        <li><a href="#prerrequisitos" data-i18n="toc.prerrequisitos">Prerrequisitos</a></li>
+        <li><a href="#configuracion-fabricante" data-i18n="toc.configuracion_fabricante">Configuración en el fabricante</a></li>
+        <li><a href="#permisos" data-i18n="toc.permisos">Permisos requeridos</a></li>
+        <li><a href="#configuracion-ruvic" data-i18n="toc.configuracion_ruvic">Configuración en Ruvic</a></li>
+        <li><a href="#verificacion" data-i18n="toc.verificacion">Verificación</a></li>
+        <li><a href="#solucion-problemas" data-i18n="toc.solucion_problemas">Solución de problemas</a></li>
+        <li><a href="#faq-seguridad" data-i18n="toc.faq_seguridad">Preguntas frecuentes y notas de seguridad</a></li>
+      </ol>
+    </nav>
+
+    <h1 data-i18n="guide_title">Conector Google Cloud Functions</h1>
+    <p class="guide-updated">{{ULTIMA_ACTUALIZACION}}</p>
+
+    <section>
+      <h2 id="que-es" data-i18n="section.que_es">¿Qué es y para qué sirve?</h2>
+      <p data-i18n="section.que_es.body">Este conector permite al agente de Ruvic invocar una función HTTP de Google Cloud Functions con un payload, listar las funciones desplegadas en la región configurada, y consultar el estado de despliegue de la función configurada.</p>
+      <div class="callout callout-warning">
+        <span class="callout-title" data-i18n="section.que_es.sensitive_title">Este conector ejecuta código real</span>
+        <span data-i18n="section.que_es.sensitive_body">invoke ejecuta la función real configurada, que puede tener efectos secundarios (escribir en otros sistemas). list_functions y get_status son de solo lectura.</span>
+      </div>
+      <table>
+        <thead><tr><th data-i18n="table.operacion">Operación</th><th data-i18n="table.que_hace">Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td><code>cloud_functions.invoke</code></td><td data-i18n="op.invoke">Invoca la función HTTP configurada con un payload</td></tr>
+          <tr><td><code>cloud_functions.list_functions</code></td><td data-i18n="op.list_functions">Lista las funciones desplegadas en la región</td></tr>
+          <tr><td><code>cloud_functions.get_status</code></td><td data-i18n="op.get_status">Consulta el estado de despliegue de la función configurada</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2 id="prerrequisitos" data-i18n="section.prerrequisitos">Prerrequisitos</h2>
+      <ul>
+        <li data-i18n="prereq.1">Una <strong>función de Google Cloud Functions (2nd gen)</strong> ya desplegada con trigger HTTP.</li>
+        <li data-i18n="prereq.2">Acceso a <strong>Google Cloud Console</strong> para crear una cuenta de servicio.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 id="configuracion-fabricante" data-i18n="section.configuracion_fabricante">Configuración en el fabricante</h2>
+      <ol class="ruvic-steps">
+        <li>
+          <strong data-i18n="step.1.label">Creá una cuenta de servicio dedicada.</strong>
+          <p data-i18n="step.1.body">En Google Cloud Console → IAM y administración → Cuentas de servicio → Crear cuenta de servicio. Generá y descargá una clave JSON.</p>
+        </li>
+        <li>
+          <strong data-i18n="step.2.label">Otorgá acceso con mínimo privilegio.</strong>
+          <p data-i18n="step.2.body">Asigná los roles "Cloud Functions Viewer" (listar/consultar estado) y "Cloud Functions Invoker" (invocar), idealmente limitados a la función específica.</p>
+        </li>
+        <li>
+          <strong data-i18n="step.3.label">Anotá los datos necesarios.</strong>
+          <p data-i18n="step.3.body">El contenido completo del archivo JSON de la cuenta de servicio, la región y el nombre de la función.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2 id="permisos" data-i18n="section.permisos">Permisos requeridos</h2>
+      <table>
+        <thead><tr><th data-i18n="table.permiso">Permiso</th><th data-i18n="table.para_que">Para qué sirve</th></tr></thead>
+        <tbody>
+          <tr><td>Cloud Functions Viewer</td><td data-i18n="perm.viewer">Listar funciones y consultar estado de despliegue</td></tr>
+          <tr><td>Cloud Functions Invoker</td><td data-i18n="perm.invoker">Invocar la función configurada</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        <span class="callout-title" data-i18n="perm.note_title">Nota</span>
+        <span data-i18n="perm.note_body">No se otorga el rol "Cloud Functions Admin", que permitiría desplegar, modificar o eliminar funciones.</span>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="configuracion-ruvic" data-i18n="section.configuracion_ruvic">Configuración en Ruvic</h2>
+      <p data-i18n="ruvic.intro">Entrá a <strong>Settings → Conectores</strong>, buscá <strong>Google Cloud Functions</strong> y pulsá <strong>Configurar</strong>. Pegá el JSON de la cuenta de servicio y completá región y nombre de función.</p>
+      <p><span class="ruvic-button" data-i18n="ruvic.test_button">Probar conexión</span><span data-i18n="ruvic.test_note"> — la plataforma consultará el estado de la función para confirmar credenciales.</span></p>
+    </section>
+
+    <section>
+      <h2 id="verificacion" data-i18n="section.verificacion">Verificación</h2>
+      <ol class="ruvic-steps">
+        <li><strong data-i18n="verif.1.label">Test de conexión exitoso.</strong><p data-i18n="verif.1.body">"Probar conexión" debe responder con éxito.</p></li>
+        <li><strong data-i18n="verif.2.label">Prueba mínima con el agente.</strong><p data-i18n="verif.2.body">Pedile:</p><blockquote data-i18n="verif.2.quote">"Listame las funciones desplegadas en esta región."</blockquote><p data-i18n="verif.2.result">El agente debe devolver el listado real de funciones y sus estados.</p></li>
+      </ol>
+    </section>
+
+    <section>
+      <h2 id="solucion-problemas" data-i18n="section.solucion_problemas">Solución de problemas</h2>
+      <table>
+        <thead><tr><th data-i18n="table.mensaje">Mensaje / síntoma</th><th data-i18n="table.causa">Causa probable y solución</th></tr></thead>
+        <tbody>
+          <tr><td data-i18n="trouble.1.msg">"Credenciales inválidas o sin permiso IAM suficiente"</td><td data-i18n="trouble.1.fix">Falta el rol "Cloud Functions Viewer" o "Cloud Functions Invoker", o la clave fue revocada.</td></tr>
+          <tr><td data-i18n="trouble.2.msg">"La función no existe"</td><td data-i18n="trouble.2.fix">Nombre de función o región mal escritos, o la función está en otro proyecto distinto al de la cuenta de servicio.</td></tr>
+          <tr><td data-i18n="trouble.3.msg">"La función no tiene una URL HTTPS invocable"</td><td data-i18n="trouble.3.fix">La función usa un trigger de eventos (Pub/Sub, Storage, etc.) en vez de HTTP; invoke solo funciona con funciones HTTP.</td></tr>
+          <tr><td data-i18n="trouble.4.msg">"Sin permiso para invocar la función" (401/403 al invocar)</td><td data-i18n="trouble.4.fix">Falta el rol "Cloud Functions Invoker" específicamente sobre esa función, o la función no permite invocaciones no autenticadas ni de esta cuenta de servicio.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2 id="faq-seguridad" data-i18n="section.faq_seguridad">Preguntas frecuentes y notas de seguridad</h2>
+      <h3 data-i18n="faq.1.q">¿El agente puede desplegar o modificar funciones?</h3>
+      <div data-i18n="faq.1.a"><p>No. La cuenta de servicio solo tiene permisos de lectura e invocación; el conector no expone ninguna operación de despliegue.</p></div>
+      <h3 data-i18n="faq.2.q">¿Dónde queda guardado el JSON de la cuenta de servicio?</h3>
+      <div data-i18n="faq.2.a"><p>Como secreto en el almacén de credenciales de la plataforma. La interfaz nunca vuelve a mostrarlo.</p></div>
+      <h3 data-i18n="faq.3.q">Rotación de credenciales</h3>
+      <div data-i18n="faq.3.a"><p>Generá una nueva clave para la cuenta de servicio periódicamente desde Google Cloud Console y actualizala en el formulario; luego eliminá la clave anterior.</p></div>
+      <h3 data-i18n="faq.4.q">¿Qué hago si el JSON de la cuenta de servicio se compromete?</h3>
+      <div data-i18n="faq.4.a"><ol><li>Eliminá la clave comprometida en Google Cloud Console → IAM y administración → Cuentas de servicio.</li><li>Generá una nueva clave y actualizala en el formulario.</li><li>Revisá los Cloud Audit Logs por invocaciones inesperadas de la función.</li></ol></div>
+      <div class="callout callout-warning">
+        <span class="callout-title" data-i18n="faq.warning_title">Buenas prácticas</span>
+        <span data-i18n="faq.warning_body">Usá una cuenta de servicio dedicada con acceso limitado a la función específica; nunca uses una identidad con el rol Cloud Functions Admin; y confirmá con el usuario antes de invocar una función de producción.</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const I18N = {
+      es: {
+        doc_title: "Conector Google Cloud Functions — Ruvic", toc_title: "Contenido",
+        "toc.que_es": "¿Qué es y para qué sirve?", "toc.prerrequisitos": "Prerrequisitos",
+        "toc.configuracion_fabricante": "Configuración en el fabricante", "toc.permisos": "Permisos requeridos",
+        "toc.configuracion_ruvic": "Configuración en Ruvic", "toc.verificacion": "Verificación",
+        "toc.solucion_problemas": "Solución de problemas", "toc.faq_seguridad": "Preguntas frecuentes y notas de seguridad",
+        guide_title: "Conector Google Cloud Functions",
+        "section.que_es": "¿Qué es y para qué sirve?",
+        "section.que_es.body": "Este conector permite al agente de Ruvic invocar una función HTTP de Google Cloud Functions con un payload, listar las funciones desplegadas en la región configurada, y consultar el estado de despliegue de la función configurada.",
+        "section.que_es.sensitive_title": "Este conector ejecuta código real",
+        "section.que_es.sensitive_body": "invoke ejecuta la función real configurada, que puede tener efectos secundarios (escribir en otros sistemas). list_functions y get_status son de solo lectura.",
+        "table.operacion": "Operación", "table.que_hace": "Qué hace",
+        "op.invoke": "Invoca la función HTTP configurada con un payload",
+        "op.list_functions": "Lista las funciones desplegadas en la región",
+        "op.get_status": "Consulta el estado de despliegue de la función configurada",
+        "section.prerrequisitos": "Prerrequisitos",
+        "prereq.1": "Una <strong>función de Google Cloud Functions (2nd gen)</strong> ya desplegada con trigger HTTP.",
+        "prereq.2": "Acceso a <strong>Google Cloud Console</strong> para crear una cuenta de servicio.",
+        "section.configuracion_fabricante": "Configuración en el fabricante",
+        "step.1.label": "Creá una cuenta de servicio dedicada.",
+        "step.1.body": "En Google Cloud Console → IAM y administración → Cuentas de servicio → Crear cuenta de servicio. Generá y descargá una clave JSON.",
+        "step.2.label": "Otorgá acceso con mínimo privilegio.",
+        "step.2.body": "Asigná los roles \"Cloud Functions Viewer\" (listar/consultar estado) y \"Cloud Functions Invoker\" (invocar), idealmente limitados a la función específica.",
+        "step.3.label": "Anotá los datos necesarios.",
+        "step.3.body": "El contenido completo del archivo JSON de la cuenta de servicio, la región y el nombre de la función.",
+        "section.permisos": "Permisos requeridos", "table.permiso": "Permiso", "table.para_que": "Para qué sirve",
+        "perm.viewer": "Listar funciones y consultar estado de despliegue", "perm.invoker": "Invocar la función configurada",
+        "perm.note_title": "Nota",
+        "perm.note_body": "No se otorga el rol \"Cloud Functions Admin\", que permitiría desplegar, modificar o eliminar funciones.",
+        "section.configuracion_ruvic": "Configuración en Ruvic",
+        "ruvic.intro": "Entrá a <strong>Settings → Conectores</strong>, buscá <strong>Google Cloud Functions</strong> y pulsá <strong>Configurar</strong>. Pegá el JSON de la cuenta de servicio y completá región y nombre de función.",
+        "ruvic.test_button": "Probar conexión",
+        "ruvic.test_note": " — la plataforma consultará el estado de la función para confirmar credenciales.",
+        "section.verificacion": "Verificación",
+        "verif.1.label": "Test de conexión exitoso.", "verif.1.body": "\"Probar conexión\" debe responder con éxito.",
+        "verif.2.label": "Prueba mínima con el agente.", "verif.2.body": "Pedile:",
+        "verif.2.quote": "\"Listame las funciones desplegadas en esta región.\"",
+        "verif.2.result": "El agente debe devolver el listado real de funciones y sus estados.",
+        "section.solucion_problemas": "Solución de problemas", "table.mensaje": "Mensaje / síntoma", "table.causa": "Causa probable y solución",
+        "trouble.1.msg": "\"Credenciales inválidas o sin permiso IAM suficiente\"",
+        "trouble.1.fix": "Falta el rol \"Cloud Functions Viewer\" o \"Cloud Functions Invoker\", o la clave fue revocada.",
+        "trouble.2.msg": "\"La función no existe\"",
+        "trouble.2.fix": "Nombre de función o región mal escritos, o la función está en otro proyecto distinto al de la cuenta de servicio.",
+        "trouble.3.msg": "\"La función no tiene una URL HTTPS invocable\"",
+        "trouble.3.fix": "La función usa un trigger de eventos (Pub/Sub, Storage, etc.) en vez de HTTP; invoke solo funciona con funciones HTTP.",
+        "trouble.4.msg": "\"Sin permiso para invocar la función\" (401/403 al invocar)",
+        "trouble.4.fix": "Falta el rol \"Cloud Functions Invoker\" específicamente sobre esa función, o la función no permite invocaciones no autenticadas ni de esta cuenta de servicio.",
+        "section.faq_seguridad": "Preguntas frecuentes y notas de seguridad",
+        "faq.1.q": "¿El agente puede desplegar o modificar funciones?",
+        "faq.1.a": "No. La cuenta de servicio solo tiene permisos de lectura e invocación; el conector no expone ninguna operación de despliegue.",
+        "faq.2.q": "¿Dónde queda guardado el JSON de la cuenta de servicio?",
+        "faq.2.a": "Como secreto en el almacén de credenciales de la plataforma. La interfaz nunca vuelve a mostrarlo.",
+        "faq.3.q": "Rotación de credenciales",
+        "faq.3.a": "Generá una nueva clave para la cuenta de servicio periódicamente desde Google Cloud Console y actualizala en el formulario; luego eliminá la clave anterior.",
+        "faq.4.q": "¿Qué hago si el JSON de la cuenta de servicio se compromete?",
+        "faq.4.a": "Eliminá la clave comprometida en Google Cloud Console. Generá una nueva y actualizala en el formulario. Revisá los Cloud Audit Logs por invocaciones inesperadas.",
+        "faq.warning_title": "Buenas prácticas",
+        "faq.warning_body": "Usá una cuenta de servicio dedicada con acceso limitado a la función específica; nunca uses una identidad con el rol Cloud Functions Admin; y confirmá con el usuario antes de invocar una función de producción.",
+      },
+      en: {
+        doc_title: "Google Cloud Functions Connector — Ruvic", toc_title: "Contents",
+        "toc.que_es": "What it is and what it's for", "toc.prerrequisitos": "Prerequisites",
+        "toc.configuracion_fabricante": "Vendor-side setup", "toc.permisos": "Required permissions",
+        "toc.configuracion_ruvic": "Setup in Ruvic", "toc.verificacion": "Verification",
+        "toc.solucion_problemas": "Troubleshooting", "toc.faq_seguridad": "FAQ and security notes",
+        guide_title: "Google Cloud Functions Connector",
+        "section.que_es": "What it is and what it's for",
+        "section.que_es.body": "This connector lets the Ruvic agent invoke an HTTP Google Cloud Function with a payload, list functions deployed in the configured region, and check the configured function's deployment status.",
+        "section.que_es.sensitive_title": "This connector executes real code",
+        "section.que_es.sensitive_body": "invoke executes the real configured function, which may have side effects (writing to other systems). list_functions and get_status are read-only.",
+        "table.operacion": "Operation", "table.que_hace": "What it does",
+        "op.invoke": "Invokes the configured HTTP function with a payload",
+        "op.list_functions": "Lists functions deployed in the region",
+        "op.get_status": "Checks the configured function's deployment status",
+        "section.prerrequisitos": "Prerequisites",
+        "prereq.1": "An existing <strong>Google Cloud Functions (2nd gen)</strong> function deployed with an HTTP trigger.",
+        "prereq.2": "Access to <strong>Google Cloud Console</strong> to create a service account.",
+        "section.configuracion_fabricante": "Vendor-side setup",
+        "step.1.label": "Create a dedicated service account.",
+        "step.1.body": "In Google Cloud Console → IAM & Admin → Service Accounts → Create Service Account. Generate and download a JSON key.",
+        "step.2.label": "Grant least-privilege access.",
+        "step.2.body": "Assign the \"Cloud Functions Viewer\" (list/check status) and \"Cloud Functions Invoker\" (invoke) roles, ideally scoped to the specific function.",
+        "step.3.label": "Note down the required data.",
+        "step.3.body": "The full content of the service account's JSON file, the region and the function name.",
+        "section.permisos": "Required permissions", "table.permiso": "Permission", "table.para_que": "Why the connector needs it",
+        "perm.viewer": "List functions and check deployment status", "perm.invoker": "Invoke the configured function",
+        "perm.note_title": "Note",
+        "perm.note_body": "The \"Cloud Functions Admin\" role is not granted, since it would allow deploying, modifying or deleting functions.",
+        "section.configuracion_ruvic": "Setup in Ruvic",
+        "ruvic.intro": "Go to <strong>Settings → Connectors</strong>, find <strong>Google Cloud Functions</strong> and click <strong>Configure</strong>. Paste the service account JSON and fill in the region and function name.",
+        "ruvic.test_button": "Test connection",
+        "ruvic.test_note": " — the platform will check the function's status to confirm credentials.",
+        "section.verificacion": "Verification",
+        "verif.1.label": "Successful connection test.", "verif.1.body": "\"Test connection\" should succeed.",
+        "verif.2.label": "Minimal test with the agent.", "verif.2.body": "Ask:",
+        "verif.2.quote": "\"List the functions deployed in this region.\"",
+        "verif.2.result": "The agent should return the real list of functions and their states.",
+        "section.solucion_problemas": "Troubleshooting", "table.mensaje": "Message / symptom", "table.causa": "Likely cause and fix",
+        "trouble.1.msg": "\"Invalid credentials or insufficient IAM permission\"",
+        "trouble.1.fix": "Missing \"Cloud Functions Viewer\" or \"Cloud Functions Invoker\" role, or the key was revoked.",
+        "trouble.2.msg": "\"The function does not exist\"",
+        "trouble.2.fix": "Function name or region mistyped, or the function lives in a different project than the service account.",
+        "trouble.3.msg": "\"The function has no invocable HTTPS URL\"",
+        "trouble.3.fix": "The function uses an event trigger (Pub/Sub, Storage, etc.) instead of HTTP; invoke only works with HTTP functions.",
+        "trouble.4.msg": "\"No permission to invoke the function\" (401/403 on invoke)",
+        "trouble.4.fix": "Missing the \"Cloud Functions Invoker\" role specifically on that function, or the function doesn't allow unauthenticated invocations nor from this service account.",
+        "section.faq_seguridad": "FAQ and security notes",
+        "faq.1.q": "Can the agent deploy or modify functions?",
+        "faq.1.a": "No. The service account only has read and invoke permissions; the connector exposes no deployment operation.",
+        "faq.2.q": "Where is the service account JSON stored?",
+        "faq.2.a": "As a secret in the platform's credential store. The UI never shows it again.",
+        "faq.3.q": "Credential rotation",
+        "faq.3.a": "Periodically generate a new key for the service account from Google Cloud Console and update it in the form; then delete the old key.",
+        "faq.4.q": "What if the service account JSON is compromised?",
+        "faq.4.a": "Delete the compromised key in Google Cloud Console. Generate a new one and update it in the form. Review Cloud Audit Logs for unexpected invocations.",
+        "faq.warning_title": "Best practices",
+        "faq.warning_body": "Use a dedicated service account scoped to the specific function; never use an identity with the Cloud Functions Admin role; and confirm with the user before invoking a production function.",
+      },
+    };
+    (function () {
+      function applyLang(lang) {
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          const key = el.getAttribute("data-i18n");
+          if (I18N[lang] && I18N[lang][key] !== undefined) el.innerHTML = I18N[lang][key];
+        });
+      }
+      let saved = "es";
+      try { const stored = localStorage.getItem("ruvic-docs-lang"); if (stored === "en" || stored === "es") saved = stored; } catch (e) {}
+      applyLang(saved);
+    })();
+  </script>
+</body>
+</html>
